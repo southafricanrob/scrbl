@@ -1,446 +1,649 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scrbl</title>
-    <link rel="manifest" href="pwa/manifest.json">
-    <meta name="theme-color" content="#f0f0f0">
-    <link rel="icon" type="image/png" sizes="192x192" href="pwa/icon-192x192.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="pwa/icon-512x512.png">
-    <link href="pwa/favicon.png" rel="shortcut icon" type="image/x-icon">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600&family=Arvo:wght@700&family=Poppins:wght@200;400;700&display=swap" rel="stylesheet">
-    <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            font-family: "Poppins", sans-serif;
-            font-weight: 400;            
-            height: 100%;
-            background-color: #f3f4f6;
-        }
-        .container {
-            width: 100%;
-            max-width: 1040px;
-            margin: auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        .logo{
-            height: 25px;
-            margin-bottom: 20px;
-            opacity: 0.8;
-        }
-        .note-input {
-            width: 100%;
-            position: relative;
-            margin-bottom: 20px;
-        }
-        .note-area {
-            width: 100%;
-            height: 150px;
-            padding: 10px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-family: "Poppins", sans-serif;
-            resize: none;
-            transition: all 0.3s ease;
-            background-color: white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            box-sizing: border-box;
-            overflow-y: auto;
-        }
-        .note-area:first-line{
-            font-weight: 600;
-            font-size: 1.2em;
-        }
-        .note-area:empty:before {
-            content: attr(data-placeholder);
-            color: #888;
-            opacity: 0.5;
-            font-size: 16px !important;
-            font-weight: 400;
-            font-size: 1.2em;
-        }
-        .note-area:focus {
-            outline: none;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            height:300px;
-        }
-        .note-heading {
-        /*    font-size: 1.2em;
-            font-weight: 600;*/
-            margin-bottom: 10px;
-        }
-        .saved-notes {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            width: 100%;
-        }
-        .note-block {
-            min-height: 60px;
-            background-color: white;
-            border-radius: 8px;
-            padding: 10px;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .note-block:hover .delete-icon {
-            display: block;
-        }
-        .note-title {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        .note-body {
-            opacity: 0.6;
-            font-size: 14px;
-        }
-        .delete-icon {
-            display: none;
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            cursor: pointer;
-            font-size: 12px;
-            color: #999;
-        }
-        .input-icons {
-            position: absolute;
-            top: 3px;
-            right: 5px;
-            display: none;
-        }
-        .note-input:hover .input-icons {
-            display: block;
-        }
-        .icon {
-            cursor: pointer;
-            display: block;
-            width: 16px;
-            color: #999;
-        }
-        @media (max-width: 768px) {
-            .saved-notes {
-                grid-template-columns: repeat(2, 1fr);
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Scrbl</title>
+        <link rel="manifest" href="pwa/manifest.json" />
+        <meta name="theme-color" content="#f0f0f0" />
+        <link
+            rel="icon"
+            type="image/png"
+            sizes="192x192"
+            href="pwa/icon-192x192.png"
+        />
+        <link
+            rel="icon"
+            type="image/png"
+            sizes="512x512"
+            href="pwa/icon-512x512.png"
+        />
+        <link href="pwa/favicon.png" rel="shortcut icon" type="image/x-icon" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600&family=Arvo:wght@700&family=Poppins:wght@200;400;700&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            body,
+            html {
+                margin: 0;
+                padding: 0;
+                font-family: "Poppins", sans-serif;
+                font-weight: 400;
+                height: 100%;
+                background-color: #f3f4f6;
             }
-        }
-        @media (max-width: 480px) {
-            .saved-notes {
-                grid-template-columns: 1fr;
+            .container {
+                width: 100%;
+                max-width: 1040px;
+                margin: auto;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                min-height: 100vh;
+                padding: 20px;
+                box-sizing: border-box;
+                margin-bottom: 20px;
             }
-        }
-    </style>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PN7SVSE4GK"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
+            #header {
+                width: 100%;
+                text-align: center;
+                position: relative;
+                margin-bottom: 10px;
+            }
+            .logo {
+                height: 16px;
+                opacity: 0.8;
+            }
+            .note-input {
+                width: 100%;
+                position: relative;
+                margin-bottom: 20px;
+            }
+            .note-area {
+                width: 100%;
+                height: 150px;
+                padding: 10px;
+                border: none;
+                border-radius: 8px;
+                font-size: 16px;
+                font-family: "Poppins", sans-serif;
+                resize: none;
+                transition: all 0.3s ease;
+                background-color: white;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                box-sizing: border-box;
+                overflow-y: auto;
+            }
+            /* list styling */
+            ul {
+                margin: 0 0 10px 20px;
+                padding: 0;
+            }
+            li {
+                margin: 4px 0;
+            }
+            .note-area:first-line {
+                font-weight: 600;
+                font-size: 1.2em;
+            }
+            .note-area:empty:before {
+                content: attr(data-placeholder);
+                color: #888;
+                opacity: 0.5;
+                font-size: 16px !important;
+                font-weight: 400;
+                font-size: 1.2em;
+            }
+            .note-area:focus {
+                outline: none;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+                height: 50vh;
+            }
+            .note-heading {
+                margin-bottom: 10px;
+            }
+            .saved-notes {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 20px;
+                width: 100%;
+            }
+            .note-block {
+                min-height: 60px;
+                background-color: white;
+                border-radius: 8px;
+                padding: 10px;
+                cursor: pointer;
+                position: relative;
+                overflow: hidden;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            }
+            .note-block:hover .delete-icon {
+                display: block;
+            }
+            .note-title {
+                font-weight: bold;
+                margin-bottom: 5px;
+            }
+            .note-body {
+                opacity: 0.6;
+                font-size: 14px;
+            }
+            .delete-icon {
+                display: none;
+                position: absolute;
+                top: 5px;
+                right: 5px;
+                cursor: pointer;
+                font-size: 12px;
+                color: #999;
+            }
+            .confirm-delete {
+              margin-left: 8px;
+              cursor: pointer;
+              font-size: 0.9em;
+            }
+            .hidden {
+              display: none;
+            }
 
-      gtag('config', 'G-PN7SVSE4GK');
-    </script>
-
-</head>
-<body>
-    <div class="container">
-<svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 50 270 60" width="270" height="60">
-  <defs>
-    <style>
-      @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@700&amp;display=swap');
-    </style>
-  </defs>
-  
-  <!-- Text "Scrbl" -->
-  <text x="50" y="100" font-family="Kanit, Arial" font-size="72" font-weight="900" fill="black">Scrbl</text>
-  
-  <!-- Underline path -->
-  <path d="M50 105 L230 105" stroke="black" stroke-width="2" fill="none"
-        stroke-dasharray="200"
-        stroke-dashoffset="200">
-    <animate 
-      attributeName="stroke-dashoffset"
-      from="200"
-      to="0"
-      dur="0.5s"
-      fill="freeze"
-      begin="0s"
-    />
-  </path>
-  
-  <!-- Pen - adjusted y position -->
-  <g transform="translate(247, 82) rotate(216)">
-    <!-- Pen body -->
-    <rect x="-6" y="-12" width="12" height="45" fill="black"/>
-    <!-- Pen tip - adjusted y position -->
-    <path d="M-6 -15 L6 -15 L0 -30 Z" fill="black"/>
-  </g>
-</svg>
-        <div class="note-input">
-            <div id="noteInput" class="note-area" contenteditable="true" data-placeholder="Start typing... (click out to save)"></div>
-            <div class="input-icons">
-                <span class="icon" id="maximizeIcon">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                      <path d="M4 4h6v2H6v4H4V4z" fill="currentColor"/>
-                      <path d="M20 4h-6v2h4v4h2V4z" fill="currentColor"/>
-                      <path d="M4 20h6v-2H6v-4H4v6z" fill="currentColor"/>
-                      <path d="M20 20h-6v-2h4v-4h2v6z" fill="currentColor"/>
-                    </svg>
-                </span>
-                <span class="icon" id="minimizeIcon" style="display:none;">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                        <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </span>
-            </div>
-        </div>
-        <div class="saved-notes" id="savedNotes"></div>
-    </div>
-
-    <script>
-        const noteInput = document.getElementById('noteInput');
-        const savedNotes = document.getElementById('savedNotes');
-        const maximizeIcon = document.getElementById('maximizeIcon');
-        const minimizeIcon = document.getElementById('minimizeIcon');
-        let notes = JSON.parse(localStorage.getItem('scrbl_notes')) || [];
-        let currentNoteIndex = -1;
-
-        function renderNotes() {
-            savedNotes.innerHTML = '';
-            notes.forEach((note, index) => {
-                const noteBlock = document.createElement('div');
-                noteBlock.className = 'note-block';
-                noteBlock.innerHTML = `
-                    <div class="note-title">${note.title}</div>
-                    <div class="note-body">${stripHtml(note.body).substring(0, 200)}${note.body.length > 200 ? '...' : ''}</div>
-                    <span class="delete-icon" data-index="${index}">✕</span>
-                `;
-                noteBlock.addEventListener('click', (e) => {
-                    if (!e.target.classList.contains('delete-icon')) {
-                        loadNote(index);
-                    }
-                });
-                savedNotes.appendChild(noteBlock);
-            });
-        }
-
-        function stripHtml(html) {
-            const tmp = document.createElement('DIV');
-            tmp.innerHTML = html;
-            return tmp.textContent || tmp.innerText || '';
-        }
-
-        function saveNote() {
-            const content = noteInput.innerHTML.trim();
-            if (content) {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(content, 'text/html');
-                const lines = Array.from(doc.body.childNodes);
-                const title = lines[0].textContent.trim();
-                const body = lines.slice(1).map(node => node.outerHTML || node.textContent).join('');
-                const noteContent = `<div class="note-heading">${title}</div>${body}`;
-                if (currentNoteIndex === -1 || currentNoteIndex >= notes.length) {
-                    notes.push({ title, body: noteContent });
-                    currentNoteIndex = notes.length - 1;
-                } else {
-                    notes[currentNoteIndex] = { title, body: noteContent };
+            .input-icons {
+                position: absolute;
+                top: 3px;
+                right: 5px;
+                display: none;
+            }
+            .note-input:hover .input-icons {
+                display: block;
+            }
+            .icon {
+                cursor: pointer;
+                display: block;
+                width: 16px;
+                color: #999;
+            }
+            .export-icon {
+                position: absolute;
+                right: 16px;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 16px;
+                height: 20px;
+                fill: #555;
+                cursor: pointer;
+                display: none;
+            }
+            #header:hover .export-icon {
+                display: block;
+            }
+            @media (max-width: 768px) {
+                .saved-notes {
+                    grid-template-columns: repeat(2, 1fr);
                 }
-                localStorage.setItem('scrbl_notes', JSON.stringify(notes));
-                renderNotes();
             }
-        }
+            @media (max-width: 480px) {
+                .saved-notes {
+                    grid-template-columns: 1fr;
+                }
+            }
+        </style>
+        <!-- Google tag (gtag.js) -->
+        <script
+            async
+            src="https://www.googletagmanager.com/gtag/js?id=G-PN7SVSE4GK"
+        ></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+                dataLayer.push(arguments);
+            }
+            gtag("js", new Date());
 
-        function loadNote(index) {
-            saveNote();  // Save the current note before clearing and loading a new one
-            clearInput();
-            currentNoteIndex = index;
-            const note = notes[index];
-            noteInput.innerHTML = note.body;
-            noteInput.focus();
-            placeCaretAtEnd(noteInput);
-        }
+            gtag("config", "G-PN7SVSE4GK");
+        </script>
+    </head>
+    <body>
+        <div class="container">
+            <div id="header">
+                <svg
+                    class="logo"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 50 270 60"
+                    width="270"
+                    height="60"
+                >
+                    <defs>
+                        <style>
+                            @import url("https://fonts.googleapis.com/css2?family=Kanit:wght@700&display=swap");
+                        </style>
+                    </defs>
 
-        function deleteNote(index) {
-            notes.splice(index, 1);
-            localStorage.setItem('notes', JSON.stringify(notes));
-            renderNotes();
-            if (currentNoteIndex === index) {
-                noteInput.innerHTML = '';
+                    <!-- Text "Scrbl" -->
+                    <text
+                        x="50"
+                        y="100"
+                        font-family="Kanit, Arial"
+                        font-size="72"
+                        font-weight="900"
+                        fill="black"
+                    >
+                        Scrbl
+                    </text>
+
+                    <!-- Underline path -->
+                    <path
+                        d="M50 105 L230 105"
+                        stroke="black"
+                        stroke-width="2"
+                        fill="none"
+                        stroke-dasharray="200"
+                        stroke-dashoffset="200"
+                    >
+                        <animate
+                            attributeName="stroke-dashoffset"
+                            from="200"
+                            to="0"
+                            dur="0.5s"
+                            fill="freeze"
+                            begin="0s"
+                        />
+                    </path>
+
+                    <!-- Pen - adjusted y position -->
+                    <g transform="translate(247, 82) rotate(216)">
+                        <!-- Pen body -->
+                        <rect x="-6" y="-12" width="12" height="45" fill="black" />
+                        <!-- Pen tip - adjusted y position -->
+                        <path d="M-6 -15 L6 -15 L0 -30 Z" fill="black" />
+                    </g>
+                </svg>
+
+                <svg
+                    class="export-icon"
+                    onclick="exportNotes()"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        d="M8.7 7.7 11 5.4V15c0 .6.4 1 1 1s1-.4 1-1V5.4l2.3 2.3c.4.4 1 .4 1.4 0 .4-.4.4-1 0-1.4l-4-4c-.1-.1-.2-.2-.3-.2-.2-.1-.5-.1-.8 0-.1 0-.2.1-.3.2l-4 4c-.4.4-.4 1 0 1.4s1 .4 1.4 0zM21 14c-.6 0-1 .4-1 1v4c0 .6-.4 1-1 1H5c-.6 0-1-.4-1-1v-4c0-.6-.4-1-1-1s-1 .4-1 1v4c0 1.7 1.3 3 3 3h14c1.7 0 3-1.3 3-3v-4c0-.6-.4-1-1-1z"
+                        fill="#999999"
+                    />
+                </svg>
+            </div>
+
+            <div class="note-input">
+                <div
+                    id="noteInput"
+                    class="note-area"
+                    contenteditable="true"
+                    data-placeholder="Start typing... (click out to save)"
+                ></div>
+                <div class="input-icons">
+                    <span class="icon" id="maximizeIcon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M4 4h6v2H6v4H4V4z" fill="currentColor" />
+                            <path d="M20 4h-6v2h4v4h2V4z" fill="currentColor" />
+                            <path d="M4 20h6v-2H6v-4H4v6z" fill="currentColor" />
+                            <path d="M20 20h-6v-2h4v-4h2v6z" fill="currentColor" />
+                        </svg>
+                    </span>
+                    <span class="icon" id="minimizeIcon" style="display: none">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path
+                                d="M6 9l6 6 6-6"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            />
+                        </svg>
+                    </span>
+                </div>
+            </div>
+            <div class="saved-notes" id="savedNotes"></div>
+        </div>
+
+        <script>
+            const noteInput = document.getElementById("noteInput");
+            const header = document.getElementById("header");
+            const savedNotes = document.getElementById("savedNotes");
+            const maximizeIcon = document.getElementById("maximizeIcon");
+            const minimizeIcon = document.getElementById("minimizeIcon");
+            let notes = JSON.parse(localStorage.getItem("scrbl_notes")) || [];
+            let currentNoteIndex = -1;
+
+            function renderNotes() {
+
+
+                savedNotes.innerHTML = "";
+                const sortedNotes = [...notes].sort((a, b) => b.lastEdited - a.lastEdited);
+                sortedNotes.forEach((note, index) => {
+                    const noteBlock = document.createElement("div");
+                    noteBlock.className = "note-block";
+                    const originalIndex = notes.findIndex(
+                        (n) => n.lastEdited === note.lastEdited && n.title === note.title && n.body === note.body,
+                    );
+                    const strippedBody = stripHtml(note.body);
+                    const bodyWithoutTitle = strippedBody.startsWith(note.title)
+                        ? strippedBody.slice(note.title.length).trimStart()
+                        : strippedBody;
+
+                    noteBlock.innerHTML = `
+                    <div class="note-title">${note.title}</div>
+                    <div class="note-body">${bodyWithoutTitle.substring(0, 200)}${bodyWithoutTitle.length > 200 ? "..." : ""}</div>
+
+                    <span class="delete-wrapper">
+                      <span class="delete-icon" data-index="${originalIndex}">✕<span class="confirm-delete hidden" data-index="${originalIndex}">Are you sure?</span></span>
+                      
+                    </span>`;
+                    noteBlock.addEventListener("click", (e) => {
+                        if (!e.target.classList.contains("delete-icon")) {
+                            loadNote(originalIndex);
+                        }
+                    });
+                    savedNotes.appendChild(noteBlock);
+                });
+            }
+
+            function stripHtml(html) {
+                const tmp = document.createElement("DIV");
+                tmp.innerHTML = html;
+                return tmp.textContent || tmp.innerText || "";
+            }
+
+            let saveTimeout;
+            // Debounce save after 3 seconds of inactivity
+            const debounceSave = () => {
+                clearTimeout(saveTimeout);
+                saveTimeout = setTimeout(() => {
+                    saveNote();
+                }, 3000);
+            };
+            noteInput.addEventListener("input", debounceSave);
+
+            function saveNote() {
+                const content = noteInput.innerHTML.trim();
+                if (content) {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(content, "text/html");
+                    const lines = Array.from(doc.body.childNodes);
+                    const title = lines[0]?.textContent.trim() || "Untitled";
+                    const body = lines.slice(1).map((node) => node.outerHTML || node.textContent).join("");
+                    const noteContent = `<div class="note-heading">${title}</div>${body}`;
+                    const timestamp = Date.now();
+                    if (currentNoteIndex === -1 || currentNoteIndex >= notes.length) {
+                        notes.push({ title, body: noteContent, lastEdited: timestamp });
+                        currentNoteIndex = notes.length - 1;
+                    } else {
+                        notes[currentNoteIndex] = { title, body: noteContent, lastEdited: timestamp };
+                    }
+                    localStorage.setItem("scrbl_notes", JSON.stringify(notes));
+                    renderNotes();
+                }
+            }
+
+            function loadNote(index) {
+                saveNote();
+                clearInput();
+                currentNoteIndex = index;
+                const note = notes[index];
+                noteInput.innerHTML = note.body;
+                noteInput.focus();
+                placeCaretAtEnd(noteInput);
+            }
+
+            function deleteNote(index) {
+                notes.splice(index, 1);
+                localStorage.setItem("scrbl_notes", JSON.stringify(notes)); // Ensure this key is correct
+                renderNotes(); // This function re-renders the notes list, which can cause the focus shift
+
+                // Explicitly check if noteInput gained focus and then blur it.
+                if (document.activeElement === noteInput) {
+                    noteInput.blur();
+                }
+
+                if (currentNoteIndex === index) {
+                    noteInput.innerHTML = ""; // Clears the input if the deleted note was being edited
+                    currentNoteIndex = -1;
+                } else if (currentNoteIndex > index) {
+                    currentNoteIndex--;
+                }
+            }
+
+            function clearInput() {
+                noteInput.innerHTML = "";
                 currentNoteIndex = -1;
-            } else if (currentNoteIndex > index) {
-                currentNoteIndex--;
             }
-        }
 
-        function clearInput() {
-            noteInput.innerHTML = '';
-            currentNoteIndex = -1;
-        }
+            function placeCaretAtEnd(el) {
+                el.focus();
+                if (typeof window.getSelection != "undefined" && typeof document.createRange != "undefined") {
+                    const range = document.createRange();
+                    range.selectNodeContents(el);
+                    range.collapse(false);
+                    const sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                }
+            }
 
-        function placeCaretAtEnd(el) {
-            el.focus();
-            if (typeof window.getSelection != "undefined" && typeof document.createRange != "undefined") {
-                var range = document.createRange();
-                range.selectNodeContents(el);
-                range.collapse(false);
-                var sel = window.getSelection();
+            function placeCaretAtStart(node) {
+                const range = document.createRange();
+                const sel = window.getSelection();
+                range.selectNodeContents(node);
+                range.collapse(true);
                 sel.removeAllRanges();
                 sel.addRange(range);
             }
-        }
 
-        function handleBoldCommand(e) {
-            if (e.key === 'b' && (e.ctrlKey || e.metaKey)) {
-                e.preventDefault();
-                document.execCommand('bold', false, null);
-            }
-        }
-
-        function handleBulletPoints(e) {
-            if (e.key === 'Enter' || e.key === 'Backspace') {
-                const selection = window.getSelection();
-                const range = selection.getRangeAt(0);
-                const startNode = range.startContainer;
-
-                if (startNode.nodeType === Node.TEXT_NODE) {
-                    const textContent = startNode.textContent;
-                    const caretPos = range.startOffset;
-                    const lineStart = textContent.lastIndexOf('\n', caretPos - 1) + 1;
-                    const currentLine = textContent.slice(lineStart, caretPos);
-
-                    if (currentLine.trim().startsWith('•')) {
-                        if (e.key === 'Enter') {
-                            e.preventDefault();
-                            // Continue bullet list without extra line break
-                            const newBulletPoint = document.createElement('div');
-                            newBulletPoint.innerHTML = '• &nbsp;';
-                            range.insertNode(newBulletPoint);
-                            range.setStart(newBulletPoint.firstChild, 2);
-                            range.setEnd(newBulletPoint.firstChild, 2);
-                            selection.removeAllRanges();
-                            selection.addRange(range);
-                        } else if (e.key === 'Backspace' && currentLine.trim() === '•') {
-                            // Remove empty bullet point
-                            e.preventDefault();
-                            const newRange = document.createRange();
-                            newRange.setStart(startNode, lineStart);
-                            newRange.setEnd(startNode, caretPos);
-                            newRange.deleteContents();
-                            selection.removeAllRanges();
-                            selection.addRange(newRange);
-                        }
-                    } else if (e.key === 'Enter' && caretPos === textContent.length) {
-                        // Start a new bullet point if Enter is pressed at the end of a line
-                        // and the current line starts with a bullet or a dash
-                        if (/^[\s•-]*[•-]\s/.test(currentLine)) {
-                            e.preventDefault();
-                            const newBulletPoint = document.createElement('div');
-                            newBulletPoint.innerHTML = '• &nbsp;';
-                            range.insertNode(newBulletPoint);
-                            range.setStart(newBulletPoint.firstChild, 2);
-                            range.setEnd(newBulletPoint.firstChild, 2);
-                            selection.removeAllRanges();
-                            selection.addRange(range);
-                        }
-                    }
+            /* Bold shortcut */
+            function handleBoldCommand(e) {
+                if (e.key === "b" && (e.ctrlKey || e.metaKey)) {
+                    e.preventDefault();
+                    document.execCommand("bold", false, null);
                 }
-            } else if (e.inputType === 'insertText' && e.data === '-') {
-                const selection = window.getSelection();
-                const range = selection.getRangeAt(0);
-                const startNode = range.startContainer;
+            }
 
-                if (startNode.nodeType === Node.TEXT_NODE) {
-                    const textContent = startNode.textContent;
-                    const caretPos = range.startOffset;
-                    const lineStart = textContent.lastIndexOf('\n', caretPos - 1) + 1;
-                    const currentLine = textContent.slice(lineStart, caretPos);
+            /* List, indent/outdent, caret placement logic - merged from scrbl-fixed-editor */
+            function handleListKeydown(e) {
+                const sel = window.getSelection();
+                if (sel.rangeCount === 0) return;
+                const range = sel.getRangeAt(0);
+                const container = range.startContainer;
+                const currentLine = container.nodeType === 3 ? container.parentNode : container;
 
-                    if (/^[\s-]*-$/.test(currentLine)) {
+                // ENTER on empty <li> => exit list
+                if (e.key === "Enter") {
+                    const li = currentLine.closest("li");
+                    if (li && li.textContent.trim() === "") {
                         e.preventDefault();
-                        const bullet = '•';
-                        document.execCommand('delete', false);
-                        document.execCommand('insertText', false, bullet + '\u00A0');
+                        const p = document.createElement("p");
+                        p.innerHTML = "<br>";
+                        noteInput.insertBefore(p, li.closest("ul").nextSibling);
+                        li.remove();
+                        placeCaretAtStart(p);
+                        return;
+                    }
+                }
+
+                // BACKSPACE on empty <li> => exit list
+                if (e.key === "Backspace") {
+                    const li = currentLine.closest("li");
+                    if (li && li.textContent.trim() === "") {
+                        e.preventDefault();
+                        const p = document.createElement("p");
+                        p.innerHTML = "<br>";
+                        noteInput.insertBefore(p, li.closest("ul").nextSibling);
+                        li.remove();
+                        placeCaretAtStart(p);
+                        return;
+                    }
+                }
+
+                // TAB / SHIFT+TAB for indent / outdent
+                if (e.key === "Tab") {
+                    const li = currentLine.closest("li");
+                    if (li) {
+                        e.preventDefault();
+                        if (e.shiftKey) {
+                            // outdent
+                            const parentUl = li.parentNode;
+                            const grandParentUl = parentUl.parentNode.closest("ul");
+                            if (grandParentUl) {
+                                const ref = parentUl.parentNode.nextSibling;
+                                parentUl.removeChild(li);
+                                grandParentUl.insertBefore(li, ref);
+                                placeCaretAtEnd(li);
+                            }
+                        } else {
+                            // indent
+                            const prevLi = li.previousElementSibling;
+                            if (prevLi) {
+                                let subUl = prevLi.querySelector("ul");
+                                if (!subUl) {
+                                    subUl = document.createElement("ul");
+                                    prevLi.appendChild(subUl);
+                                }
+                                li.parentNode.removeChild(li);
+                                subUl.appendChild(li);
+                                placeCaretAtEnd(li);
+                            }
+                        }
                     }
                 }
             }
-        }
 
-        noteInput.addEventListener('keydown', handleBoldCommand);
-        noteInput.addEventListener('keydown', handleBulletPoints);
-        noteInput.addEventListener('input', handleBulletPoints);
+            function handleListInput(e) {
+                const sel = window.getSelection();
+                if (sel.rangeCount === 0) return;
+                const range = sel.getRangeAt(0);
+                const container = range.startContainer;
+                const parent = container.parentNode;
 
-        noteInput.addEventListener('paste', (e) => {
-            e.preventDefault();
-            const text = e.clipboardData.getData('text/plain');
-            document.execCommand('insertText', false, text);
-        });
-
-        noteInput.addEventListener('focus', () => {
-            if (currentNoteIndex === -1 && noteInput.innerHTML.trim() === '') {
-                currentNoteIndex = notes.length;
-            }
-        });
-
-        document.addEventListener('click', (e) => {
-            const isClickInsideInput = noteInput.contains(e.target);
-            const isClickInsideNoteBlock = e.target.closest('.note-block');
-            const isClickInsideIcons = e.target.closest('.input-icons');
-            
-            if (!isClickInsideInput && !isClickInsideNoteBlock && !isClickInsideIcons) {
-                saveNote();
-                clearInput();
-            }
-        });
-
-        savedNotes.addEventListener('click', (e) => {
-            if (e.target.classList.contains('delete-icon')) {
-                e.stopPropagation();
-                deleteNote(parseInt(e.target.dataset.index));
-            } else {
-                const clickedNoteIndex = parseInt(e.target.closest('.note-block').querySelector('.delete-icon').dataset.index);
-                if (clickedNoteIndex !== currentNoteIndex) {
-                    saveNote();  // Save the current note before loading a new one
-                    loadNote(clickedNoteIndex);
+                // Detect beginning of line "- " or "• " and convert to bullet list
+                if (container.nodeType === 3 && /^\s*[-\u2022]\s$/.test(container.textContent)) {
+                    const ul = document.createElement("ul");
+                    const li = document.createElement("li");
+                    li.innerHTML = "&nbsp;";
+                    ul.appendChild(li);
+                    parent.replaceWith(ul);
+                    placeCaretAtStart(li);
                 }
             }
-        });
 
-        maximizeIcon.addEventListener('click', () => {
-            noteInput.style.minHeight = 'calc(90vh - 100px)';
-            maximizeIcon.style.display = 'none';
-            minimizeIcon.style.display = 'block';
-        });
+            // Event listeners
+            noteInput.addEventListener("keydown", handleBoldCommand);
+            noteInput.addEventListener("keydown", handleListKeydown);
+            noteInput.addEventListener("input", handleListInput);
 
-        minimizeIcon.addEventListener('click', () => {
-            noteInput.style.minHeight = '100px';
-            maximizeIcon.style.display = 'block';
-            minimizeIcon.style.display = 'none';
-        });
-
-        renderNotes();
-
-        // Register service worker
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('pwa/service-worker.js')
-                    .then((registration) => {
-                        console.log('Service Worker registered with scope:', registration.scope);
-                    })
-                    .catch((error) => {
-                        console.log('Service Worker registration failed:', error);
-                    });
+            // Paste as plaintext
+            noteInput.addEventListener("paste", (e) => {
+                e.preventDefault();
+                const text = e.clipboardData.getData("text/plain");
+                document.execCommand("insertText", false, text);
             });
-        }
-    </script>
-</body>
+
+            noteInput.addEventListener("focus", () => {
+                if (currentNoteIndex === -1 && noteInput.innerHTML.trim() === "") {
+                    currentNoteIndex = notes.length;
+                }
+            });
+
+            document.addEventListener("click", (e) => {
+                const isClickInsideInput = noteInput.contains(e.target);
+                const isClickInsideNoteBlock = e.target.closest(".note-block");
+                const isClickInsideIcons = e.target.closest(".input-icons");
+
+                if (!isClickInsideInput && !isClickInsideNoteBlock && !isClickInsideIcons) {
+                    saveNote();
+                    clearInput();
+                }
+            });
+
+            savedNotes.addEventListener("click", (e) => {
+                const deleteIcon = e.target.closest(".delete-icon");
+                const confirmText = e.target.closest(".confirm-delete");
+
+                if (deleteIcon) {
+                    e.stopPropagation();
+                    const wrapper = deleteIcon.parentElement;
+                    const confirmEl = wrapper.querySelector(".confirm-delete");
+
+                    if (confirmEl.classList.contains("hidden")) {
+                        // First click – show confirmation
+                        confirmEl.classList.remove("hidden");
+
+                        // Optional: auto-hide confirmation after 3 seconds
+                        setTimeout(() => {
+                            confirmEl.classList.add("hidden");
+                        }, 3000);
+                    } else {
+                        // Second click on ✕ (after confirmation is shown)
+                        deleteNote(parseInt(deleteIcon.dataset.index));
+                    }
+                } else if (confirmText) {
+                    // User clicked directly on "Are you sure?"
+                    deleteNote(parseInt(confirmText.dataset.index));
+                } else {
+                    // Regular click on a note block (not on delete-related elements)
+                    const clickedNoteIndex = parseInt(
+                        e.target.closest(".note-block").querySelector(".delete-icon").dataset.index,
+                    );
+                    if (clickedNoteIndex !== currentNoteIndex) {
+                        saveNote();
+                        loadNote(clickedNoteIndex);
+                    }
+                }
+            });
+
+
+            maximizeIcon.addEventListener("click", () => {
+                noteInput.style.minHeight = "calc(100vh - 50px)";
+                header.style.display="none";
+                maximizeIcon.style.display = "none";
+                minimizeIcon.style.display = "block";
+            });
+
+            minimizeIcon.addEventListener("click", () => {
+                noteInput.style.minHeight = "100px";
+                header.style.display="block";
+                maximizeIcon.style.display = "block";
+                minimizeIcon.style.display = "none";
+            });
+
+            renderNotes();
+
+            function exportNotes() {
+                const json = JSON.stringify(notes, null, 2);
+                const blob = new Blob([json], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "notes.json";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+
+            // Register service worker
+            if ("serviceWorker" in navigator) {
+                window.addEventListener("load", () => {
+                    navigator.serviceWorker
+                        .register("pwa/service-worker.js")
+                        .then((registration) => {
+                            console.log("Service Worker registered with scope:", registration.scope);
+                        })
+                        .catch((error) => {
+                            console.log("Service Worker registration failed:", error);
+                        });
+                });
+            }
+        </script>
+    </body>
 </html>
