@@ -645,6 +645,20 @@
                 minimizeIcon.style.display = "none";
             });
 
+            // Add Escape key functionality to minimize when maximized
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "Escape" && minimizeIcon.style.display === "block") {
+                    e.preventDefault();
+                    // Trigger the minimize functionality
+                    container.style.maxWidth = "1140px";
+                    container.style.padding = "20px";
+                    noteInput.style.minHeight = "100px";
+                    header.style.display = "block";
+                    maximizeIcon.style.display = "block";
+                    minimizeIcon.style.display = "none";
+                }
+            });
+
             renderNotes();
 
             function exportNotes() {
