@@ -35,7 +35,7 @@
                 height: 100%;
                 background-color: #f3f4f6;
             }
-            .container {
+            #container {
                 width: 100%;
                 max-width: 1040px;
                 margin: auto;
@@ -206,7 +206,7 @@
         </script>
     </head>
     <body>
-        <div class="container">
+        <div id="container">
             <div id="header">
                 <svg
                     class="logo"
@@ -308,6 +308,7 @@
         </div>
 
         <script>
+            const container = document.getElementById("container");
             const noteInput = document.getElementById("noteInput");
             const header = document.getElementById("header");
             const savedNotes = document.getElementById("savedNotes");
@@ -361,7 +362,7 @@
                 clearTimeout(saveTimeout);
                 saveTimeout = setTimeout(() => {
                     saveNote();
-                }, 3000);
+                }, 1000);
             };
             noteInput.addEventListener("input", debounceSave);
 
@@ -553,7 +554,32 @@
                 }
             });
 
+            let isDragging = false;
+            let dragStartTarget = null;
+
+            document.addEventListener("mousedown", (e) => {
+                isDragging = false;
+                dragStartTarget = e.target;
+            });
+
+            document.addEventListener("mousemove", (e) => {
+                if (dragStartTarget) {
+                    isDragging = true;
+                }
+            });
+
+            document.addEventListener("mouseup", (e) => {
+                setTimeout(() => {
+                    isDragging = false;
+                    dragStartTarget = null;
+                }, 10);
+            });
+
             document.addEventListener("click", (e) => {
+                // Don't clear input if we just finished dragging (text selection)
+                if (isDragging) {
+                    return;
+                }
                 const isClickInsideInput = noteInput.contains(e.target);
                 const isClickInsideNoteBlock = e.target.closest(".note-block");
                 const isClickInsideIcons = e.target.closest(".input-icons");
@@ -602,6 +628,8 @@
 
 
             maximizeIcon.addEventListener("click", () => {
+                container.style.maxWidth = "unset";
+                container.style.padding = "0";
                 noteInput.style.minHeight = "calc(100vh - 50px)";
                 header.style.display="none";
                 maximizeIcon.style.display = "none";
@@ -609,6 +637,8 @@
             });
 
             minimizeIcon.addEventListener("click", () => {
+                container.style.maxWidth = "1140px";
+                container.style.padding = "20px";
                 noteInput.style.minHeight = "100px";
                 header.style.display="block";
                 maximizeIcon.style.display = "block";
